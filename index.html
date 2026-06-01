@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JRB Player de Rádio - Premium</title>
+    
+    <!-- Manifesto PWA e Metas para Mobile -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00ffcc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="logo.svg">
+    
+    <!-- Tipografia Premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Design Tokens & Sistema de Cores (HSL Tailored) */
+        :root {
+            --bg-color-1: #0b131a;
+            --bg-color-2: #05080c;
+            --primary: #00ffcc;
+            --primary-glow: rgba(0, 255, 204, 0.4);
+            --secondary: #0099ff;
+            --secondary-glow: rgba(0, 153, 255, 0.4);
+            --danger: #ff4e50;
+            --danger-glow: rgba(255, 78, 80, 0.4);
+            --warning: #f9d423;
+            --text-light: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --card-glass: rgba(0, 0, 0, 0.25);
+        }
+
+        /* Reset e Definições Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color-2);
+            background-image: radial-gradient(circle at 10% 20%, var(--bg-color-1) 0%, var(--bg-color-2) 90%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-light);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Efeitos de Luzes Flutuantes no Fundo (Ambient Glow) */
+        .ambient-glow-1 {
+            position: absolute;
+            top: 15%;
+            left: 10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: 0;
+            animation: drift 20s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            bottom: 15%;
+            right: 10%;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, var(--secondary-glow) 0%, transparent 70%);
+            filter: blur(90px);
+            z-index: 0;
+            animation: drift 25s infinite alternate-reverse ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 40px) scale(1.15); }
+        }
+
+        /* Container Principal do Player (Responsivo / Glassmorphism) */
+        .player-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 35px 25px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Header e Botão de Instalação PWA */
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 0 5px;
+        }
+
+        .player-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .player-logo-text {
+            background: linear-gradient(135deg, var(--text-light) 30%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .player-logo-icon {
+            width: 24px;
+            height: 24px;
+            filter: drop-shadow(0 0 6px var(--primary-glow));
+        }
+
+        .btn-install {
+            display: none; /* Exibido dinamicamente se elegível para PWA */
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-install:hover {
+            background: var(--primary);
+            color: var(--bg-color-2);
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        /* Equalizador Visual Animado */
+        .equalizer-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 6px;
+            height: 45px;
+            margin: 25px 0;
+        }
+
+        .eq-bar {
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to top, var(--secondary), var(--primary));
+            border-radius: 3px;
+            transform-origin: bottom;
+            transform: scaleY(0.15);
+            transition: transform 0.25s ease, background 0.3s ease;
+        }
+
+        /* Animações com base no Estado de Reprodução */
+        .player-card.state-playing .eq-bar {
+            animation: eqBounce 1.2s ease-in-out infinite alternate;
+        }
+        .player-card.state-playing .eq-bar:nth-child(1) { animation-delay: 0.15s; }
+        .player-card.state-playing .eq-bar:nth-child(2) { animation-delay: 0.45s; }
+        .player-card.state-playing .eq-bar:nth-child(3) { animation-delay: 0.25s; }
+        .player-card.state-playing .eq-bar:nth-child(4) { animation-delay: 0.65s; }
+        .player-card.state-playing .eq-bar:nth-child(5) { animation-delay: 0.35s; }
+        .player-card.state-playing .eq-bar:nth-child(6) { animation-delay: 0.55s; }
+        .player-card.state-playing .eq-bar:nth-child(7) { animation-delay: 0.10s; }
+
+        .player-card.state-connecting .eq-bar,
+        .player-card.state-reconnecting .eq-bar {
+            animation: eqPulse 1s ease-in-out infinite alternate;
+            background: linear-gradient(to top, var(--secondary), var(--warning));
+        }
+        .player-card.state-connecting .eq-bar:nth-child(even),
+        .player-card.state-reconnecting .eq-bar:nth-child(even) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes eqBounce {
+            0% { transform: scaleY(0.15); }
+            100% { transform: scaleY(1); }
+        }
+
+        @keyframes eqPulse {
+            0% { transform: scaleY(0.2); opacity: 0.4; }
+            100% { transform: scaleY(0.55); opacity: 1; }
+        }
+
+        /* Detalhes da Estação Ativa */
+        .station-display-info {
+            margin-bottom: 25px;
+        }
+
+        .active-station-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.2px;
+            transition: color 0.3s ease;
+        }
+
+        .active-station-status {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        /* Pulsar para indicativo de Ao Vivo */
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .player-card.state-playing .live-dot {
+            animation: indicatorGlow 1.2s infinite alternate;
+        }
+        .player-card.state-connecting .live-dot,
+        .player-card.state-reconnecting .live-dot {
+            background-color: var(--warning);
+            animation: indicatorGlow 0.6s infinite alternate;
+        }
+        .player-card.state-paused .live-dot,
+        .player-card.state-idle .live-dot {
+            background-color: var(--text-muted);
+        }
+
+        @keyframes indicatorGlow {
+            0% { transform: scale(0.9); opacity: 0.4; box-shadow: 0 0 0 rgba(0, 255, 204, 0); }
+            100% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 8px var(--primary); }
+        }
+
+        /* Lista Premium de Estações (Custom Cards) */
+        .stations-list-title {
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 0 12px 4px;
+        }
+
+        .stations-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 25px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* Custom Scrollbar para a lista de estações */
+        .stations-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+        .stations-grid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+        .stations-grid::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+        .stations-grid::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .station-card {
+            background: var(--card-glass);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.30s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .station-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .station-card.active {
+            background: rgba(0, 255, 204, 0.08);
+            border-color: rgba(0, 255, 204, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.05);
+        }
+
+        .station-card-info h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+            transition: color 0.3s ease;
+        }
+
+        .station-card.active .station-card-info h3 {
+            color: var(--primary);
+        }
+
+        .station-card-info p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .station-card-indicator {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .station-card.active .station-card-indicator {
+            border-color: var(--primary);
+            background-color: var(--primary);
+        }
+
+        .station-card.active .station-card-indicator::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: var(--bg-color-2);
+            border-radius: 50%;
+            display: block;
+        }
+
+        /* Área de Controle (Botões Principais) */
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Botões Próximo / Anterior */
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .btn-nav:active {
+            transform: scale(0.95);
+        }
+
+        /* Botão de Play/Pause Principal */
+        .btn-play-outer {
+            position: relative;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-play {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--bg-color-2);
+            cursor: pointer;
+            box-shadow: 0 8px 25px var(--primary-glow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .btn-play:hover {
+            transform: scale(1.08);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.6);
+        }
+
+        .btn-play:active {
+            transform: scale(0.94);
+        }
+
+        /* Animação do botão mudando de cor se estiver ativo/playing */
+        .player-card.state-playing .btn-play {
+            background: linear-gradient(135deg, var(--danger), var(--warning));
+            box-shadow: 0 8px 25px var(--danger-glow);
+        }
+        .player-card.state-playing .btn-play:hover {
+            box-shadow: 0 10px 30px rgba(255, 78, 80, 0.6);
+        }
+
+        .btn-play svg {
+            width: 32px;
+            height: 32px;
+            fill: currentColor;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-play svg.play-icon { display: block; }
+        .btn-play svg.pause-icon { display: none; }
+        .btn-play .btn-spinner { display: none; }
+
+        .player-card.state-playing .btn-play svg.play-icon { display: none; }
+        .player-card.state-playing .btn-play svg.pause-icon { display: block; }
+
+        /* Estado carregando / conectando */
+        .player-card.state-connecting .btn-play svg.play-icon,
+        .player-card.state-connecting .btn-play svg.pause-icon,
+        .player-card.state-reconnecting .btn-play svg.play-icon,
+        .player-card.state-reconnecting .btn-play svg.pause-icon {
+            display: none;
+        }
+        
+        .player-card.state-connecting .btn-play .btn-spinner,
+        .player-card.state-reconnecting .btn-play .btn-spinner {
+            display: block;
+        }
+
+        .btn-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3.5px solid rgba(0,0,0,0.15);
+            border-radius: 50%;
+            border-top-color: var(--bg-color-2);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Pulsar circular de fundo sob o Play */
+        .play-pulse-ring {
+            position: absolute;
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            opacity: 0;
+            z-index: 1;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        .player-card.state-playing .play-pulse-ring {
+            animation: rippleGlow 2s infinite cubic-bezier(0.24, 0, 0.38, 1);
+            background-color: var(--danger);
+        }
+        .player-card.state-connecting .play-pulse-ring,
+        .player-card.state-reconnecting .play-pulse-ring {
+            animation: rippleGlow 1s infinite alternate cubic-bezier(0.24, 0, 0.38, 1);
+            background-color: var(--warning);
+        }
+
+        @keyframes rippleGlow {
+            0% { transform: scale(1); opacity: 0.55; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        /* Controle de Volume Dinâmico */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.15);
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .volume-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+
+        .volume-btn:hover {
+            color: var(--primary);
+        }
+
+        .volume-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 130px;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: pointer;
+            background-image: linear-gradient(var(--primary), var(--primary));
+            background-size: 80% 100%;
+            background-repeat: no-repeat;
+            transition: background 0.1s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--text-light);
+            border: none;
+            box-shadow: 0 0 6px rgba(0,0,0,0.5);
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+            background: var(--primary);
+        }
+
+        /* Status de Texto / Mensagens do Sistema */
+        .status-message {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            height: 22px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            transition: color 0.3s ease;
+        }
+
+        .player-card.state-error .status-message {
+            color: var(--danger);
+        }
+        .player-card.state-connecting .status-message,
+        .player-card.state-reconnecting .status-message {
+            color: var(--warning);
+        }
+
+        /* Seletor Nativo Oculto (Mantido para compatibilidade semântica) */
+        #stationSelect {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div id="playerCard" class="player-card state-idle">
+        
+        <!-- Header -->
+        <div class="player-header">
+            <div class="player-logo">
+                <svg class="player-logo-icon" viewBox="0 0 512 512">
+                    <defs>
+                        <linearGradient id="logo-mini-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00ffcc" />
+                            <stop offset="100%" stop-color="#0099ff" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="256" cy="256" r="240" fill="none" stroke="url(#logo-mini-grad)" stroke-width="24" opacity="0.3"/>
+                    <path d="M 176 256 A 80 80 0 0 1 336 256" fill="none" stroke="url(#logo-mini-grad)" stroke-width="24" stroke-linecap="round" />
+                    <rect x="146" y="226" width="30" height="70" rx="12" fill="url(#logo-mini-grad)" />
+                    <rect x="336" y="226" width="30" height="70" rx="12" fill="url(#logo-mini-grad)" />
+                    <polygon points="220,206 310,256 220,306" fill="url(#logo-mini-grad)" />
+                </svg>
+                <span class="player-logo-text">JRB Web Radio</span>
+            </div>
+            <button id="installBtn" class="btn-install">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Instalar
+            </button>
+        </div>
+
+        <!-- Equalizador visual -->
+        <div class="equalizer-container">
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+        </div>
+
+        <!-- Informações da Rádio ativa -->
+        <div class="station-display-info">
+            <h1 id="activeStationTitle" class="active-station-title">Selecione uma rádio</h1>
+            <div class="active-station-status">
+                <span class="live-dot"></span>
+                <span id="liveStatusText">Ao Vivo</span>
+            </div>
+        </div>
+
+        <!-- Lista Premium de Estações -->
+        <div class="stations-list-title">Estações Disponíveis</div>
+        <div class="stations-grid" id="stationsGrid">
+            <!-- Cards Populados por JS para sincronizar com Array do Player -->
+        </div>
+
+        <!-- Seletor Nativo mantido oculto -->
+        <select id="stationSelect">
+            <option value="http://cast.radiu.live:6776/stream">Rádio Jaraguar FM - JRB</option>
+            <option value="https://29306.live.streamtheworld.com:443/RADIOTRANSMUNDIALAAC_SC">RTM - Rádio Trans Mundial - JRB</option>
+            <option value="https://sc4s.cdn.upx.com:9000/stream">Rádio IPB - JRB</option>
+            <option value="https://sc4s.cdn.upx.com:8270/stream">Rádio Pinheiros - JRB</option>
+        </select>
+
+        <!-- Controle de Volume -->
+        <div class="volume-container">
+            <button class="volume-btn" id="volumeBtn" aria-label="Mudo/Volume">
+                <svg id="volumeIcon" viewBox="0 0 24 24">
+                    <!-- Path populado por JS -->
+                </svg>
+            </button>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Ajustar Volume">
+        </div>
+
+        <!-- Controles de Player -->
+        <div class="controls-row">
+            <button id="prevBtn" class="btn-nav" aria-label="Estação Anterior">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+            </button>
+            
+            <div class="btn-play-outer">
+                <div class="play-pulse-ring"></div>
+                <button id="playBtn" class="btn-play" aria-label="Play/Pause">
+                    <!-- Play Icon -->
+                    <svg class="play-icon" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"></path>
+                    </svg>
+                    <!-- Pause Icon -->
+                    <svg class="pause-icon" viewBox="0 0 24 24">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+                    </svg>
+                    <!-- Loading Spinner -->
+                    <div class="btn-spinner"></div>
+                </button>
+            </div>
+
+            <button id="nextBtn" class="btn-nav" aria-label="Próxima Estação">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+            </button>
+        </div>
+
+        <!-- Status do sistema -->
+        <div id="statusText" class="status-message">Carregando player...</div>
+    </div>
+
+    <script>
+        // Array Estruturado de Estações para Fácil Controle
+        const STATIONS = [
+            {
+                name: "Rádio Jaraguar FM",
+                details: "JRB - Jacobina / BA",
+                url: "http://cast.radiu.live:6776/stream"
+            },
+            {
+                name: "Rádio Trans Mundial",
+                details: "RTM - Programação Nacional",
+                url: "https://29306.live.streamtheworld.com:443/RADIOTRANSMUNDIALAAC_SC"
+            },
+            {
+                name: "Rádio IPB",
+                details: "Igreja Presbiteriana do Brasil",
+                url: "https://sc4s.cdn.upx.com:9000/stream"
+            },
+            {
+                name: "Rádio Pinheiros",
+                details: "Igreja Presbiteriana de Pinheiros",
+                url: "https://sc4s.cdn.upx.com:8270/stream"
+            }
+        ];
+
+        // Estado Global do Player
+        let currentStationIndex = 0;
+        let playbackState = 'idle'; // idle | connecting | playing | paused | reconnecting | error
+        let isMuted = false;
+        let savedVolume = 0.8;
+
+        // Mecanismo de Reconexão (Resilient Audio Engine)
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 5;
+        let reconnectTimeoutId = null;
+
+        // Instanciação e Configuração do Elemento de Áudio HTML5
+        const audioPlayer = new Audio();
+        audioPlayer.preload = 'none';
+
+        // Elementos DOM
+        const playerCard = document.getElementById('playerCard');
+        const playBtn = document.getElementById('playBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const activeStationTitle = document.getElementById('activeStationTitle');
+        const statusText = document.getElementById('statusText');
+        const stationsGrid = document.getElementById('stationsGrid');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeBtn = document.getElementById('volumeBtn');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const liveStatusText = document.getElementById('liveStatusText');
+
+        // Inicializa a interface das estações
+        function initStationCards() {
+            stationsGrid.innerHTML = '';
+            STATIONS.forEach((station, index) => {
+                const card = document.createElement('div');
+                card.className = `station-card ${index === currentStationIndex ? 'active' : ''}`;
+                card.setAttribute('data-index', index);
+                
+                card.innerHTML = `
+                    <div class="station-card-info">
+                        <h3>${station.name}</h3>
+                        <p>${station.details}</p>
+                    </div>
+                    <div class="station-card-indicator"></div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    selectStation(index);
+                });
+                
+                stationsGrid.appendChild(card);
+            });
+
+            // Sincroniza seletor nativo oculto
+            const selectElement = document.getElementById('stationSelect');
+            if (selectElement) {
+                selectElement.selectedIndex = currentStationIndex;
+            }
+        }
+
+        // Atualiza a classe de estado no player-card para os efeitos CSS
+        function setPlaybackState(state) {
+            playbackState = state;
+            playerCard.className = `player-card state-${state}`;
+            
+            // Textos amigáveis para cada estado
+            switch (state) {
+                case 'idle':
+                    statusText.textContent = "Pronto para reproduzir";
+                    liveStatusText.textContent = "Ao Vivo";
+                    break;
+                case 'connecting':
+                    statusText.textContent = "Sintonizando estação...";
+                    liveStatusText.textContent = "Conectando";
+                    break;
+                case 'playing':
+                    statusText.textContent = "Transmitindo sinal ao vivo";
+                    liveStatusText.textContent = "Ao Vivo";
+                    // Limpa histórico de tentativas ao conectar com sucesso
+                    reconnectAttempts = 0;
+                    break;
+                case 'paused':
+                    statusText.textContent = "Transmissão pausada";
+                    liveStatusText.textContent = "Pausado";
+                    break;
+                case 'reconnecting':
+                    liveStatusText.textContent = "Reconectando";
+                    break;
+                case 'error':
+                    statusText.textContent = "Erro na conexão com a rádio.";
+                    liveStatusText.textContent = "Sem Sinal";
+                    break;
+            }
+        }
+
+        // Selecionar uma Rádio da Lista
+        function selectStation(index, forcePlay = true) {
+            // Garante que o índice esteja dentro dos limites
+            if (index < 0) index = STATIONS.length - 1;
+            if (index >= STATIONS.length) index = 0;
+
+            const wasPlaying = playbackState === 'playing' || playbackState === 'connecting' || playbackState === 'reconnecting';
+            
+            currentStationIndex = index;
+            
+            // Atualiza seleção visual dos cards
+            const cards = stationsGrid.querySelectorAll('.station-card');
+            cards.forEach((card, idx) => {
+                if (idx === currentStationIndex) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+
+            // Sincroniza seletor oculto
+            const selectElement = document.getElementById('stationSelect');
+            if (selectElement) {
+                selectElement.selectedIndex = currentStationIndex;
+            }
+
+            // Atualiza título ativo
+            activeStationTitle.textContent = STATIONS[currentStationIndex].name;
+            
+            // Salva a última rádio selecionada localmente
+            localStorage.setItem('jrb_last_station', currentStationIndex);
+
+            // Cancela agendamentos de reconexão antigos
+            clearTimeout(reconnectTimeoutId);
+            reconnectAttempts = 0;
+
+            if (wasPlaying || forcePlay) {
+                connectAndPlay();
+            } else {
+                setPlaybackState('idle');
+            }
+        }
+
+        // Conectar e Iniciar Stream
+        function connectAndPlay() {
+            setPlaybackState('connecting');
+            
+            // CRUCIAL: Liberar stream anterior antes de conectar ao novo
+            audioPlayer.src = '';
+            audioPlayer.load();
+
+            // Define nova fonte
+            const streamUrl = STATIONS[currentStationIndex].url;
+            audioPlayer.src = streamUrl;
+            
+            console.log(`Conectando a: ${STATIONS[currentStationIndex].name} - ${streamUrl}`);
+            
+            audioPlayer.play()
+                .then(() => {
+                    setPlaybackState('playing');
+                    updateMediaSession();
+                })
+                .catch(error => {
+                    console.warn("Erro ao reproduzir stream de áudio:", error);
+                    // Dispara reconexão automática resiliente
+                    handlePlaybackFailure();
+                });
+        }
+
+        // Interromper a reprodução e fechar a conexão de rede
+        function pausePlayback() {
+            audioPlayer.pause();
+            
+            // CRUCIAL: Resiliência em conexões móveis!
+            // Rádios web transmitem streams contínuos. Apenas pausar deixa o buffer de rede aberto.
+            // Para economizar dados móveis e processamento de background no celular, liberamos o SRC.
+            audioPlayer.src = '';
+            audioPlayer.load();
+            
+            setPlaybackState('paused');
+            clearTimeout(reconnectTimeoutId);
+            reconnectAttempts = 0;
+        }
+
+        // Gerenciador de Falhas de Áudio (Engine de Reconexão Resiliente com Backoff Exponencial)
+        function handlePlaybackFailure() {
+            // Se já alcançamos o limite de tentativas, para e exibe erro final
+            if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                setPlaybackState('error');
+                statusText.textContent = "Conexão perdida. Verifique sua rede e tente novamente.";
+                return;
+            }
+
+            reconnectAttempts++;
+            setPlaybackState('reconnecting');
+            
+            // Calcula o atraso com Backoff Exponencial (ex: 2s, 4s, 8s, 16s...)
+            const delay = Math.min(Math.pow(2, reconnectAttempts) * 1000, 30000);
+            
+            statusText.textContent = `Sinal oscilou. Reconectando em ${delay/1000}s... (Tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`;
+            
+            // Executa tentativa após o atraso calculado
+            clearTimeout(reconnectTimeoutId);
+            reconnectTimeoutId = setTimeout(() => {
+                console.log(`Tentando reconectar (Tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+                
+                audioPlayer.src = STATIONS[currentStationIndex].url;
+                audioPlayer.play()
+                    .then(() => {
+                        setPlaybackState('playing');
+                        updateMediaSession();
+                    })
+                    .catch(() => {
+                        // Recursão controlada em caso de nova falha
+                        handlePlaybackFailure();
+                    });
+            }, delay);
+        }
+
+        // Controle de Play/Pause Principal
+        playBtn.addEventListener('click', () => {
+            if (playbackState === 'playing' || playbackState === 'connecting' || playbackState === 'reconnecting') {
+                pausePlayback();
+            } else {
+                connectAndPlay();
+            }
+        });
+
+        // Controles de Navegação (Next / Prev)
+        prevBtn.addEventListener('click', () => {
+            selectStation(currentStationIndex - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+            selectStation(currentStationIndex + 1);
+        });
+
+        // Eventos nativos do elemento de áudio (Ciclo de Vida Resiliente)
+        audioPlayer.addEventListener('waiting', () => {
+            // Disparado quando a internet oscila e o áudio aguarda buffering
+            if (playbackState === 'playing') {
+                setPlaybackState('connecting');
+                statusText.textContent = "Carregando sinal (Buffering)...";
+            }
+        });
+
+        audioPlayer.addEventListener('playing', () => {
+            setPlaybackState('playing');
+        });
+
+        audioPlayer.addEventListener('stalled', () => {
+            // Disparado quando o navegador tenta buscar dados de áudio, mas os dados não chegam
+            console.log("Fluxo de áudio stalled. Tentando reconexão sutil...");
+            if (playbackState === 'playing') {
+                handlePlaybackFailure();
+            }
+        });
+
+        audioPlayer.addEventListener('error', (e) => {
+            console.error("Erro interno do elemento Audio:", e);
+            if (playbackState !== 'paused' && playbackState !== 'idle') {
+                handlePlaybackFailure();
+            }
+        });
+
+        // Controle de Volume Premium
+        function updateVolume(val) {
+            audioPlayer.volume = val;
+            
+            // Atualiza estilo linear visual no Slider
+            const percent = val * 100;
+            volumeSlider.style.backgroundImage = `linear-gradient(90deg, var(--primary) ${percent}%, rgba(255,255,255,0.1) ${percent}%)`;
+            
+            // Salva o volume preferido localmente
+            if (!isMuted) {
+                savedVolume = val;
+                localStorage.setItem('jrb_volume', val);
+            }
+            
+            // Atualiza ícone do botão dinamicamente
+            if (val === 0 || isMuted) {
+                // Ícone Mudo
+                volumeIcon.innerHTML = `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>`;
+            } else if (val < 0.4) {
+                // Volume Baixo
+                volumeIcon.innerHTML = `<path d="M7 9v6h4l5 5V4L11 9H7zm11.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"></path>`;
+            } else {
+                // Volume Alto
+                volumeIcon.innerHTML = `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>`;
+            }
+        }
+
+        volumeSlider.addEventListener('input', (e) => {
+            isMuted = false;
+            updateVolume(parseFloat(e.target.value));
+        });
+
+        // Alterna entre Mudo e Ativo ao clicar no ícone de volume
+        volumeBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                audioPlayer.muted = true;
+                updateVolume(0);
+            } else {
+                audioPlayer.muted = false;
+                volumeSlider.value = savedVolume;
+                updateVolume(savedVolume);
+            }
+        });
+
+        // =========================================================================
+        // MOBILE BACKGROUND INTEGRATION (Media Session API)
+        // =========================================================================
+        function updateMediaSession() {
+            if ('mediaSession' in navigator) {
+                const activeStation = STATIONS[currentStationIndex];
+                
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: activeStation.name,
+                    artist: "Rádio Ao Vivo",
+                    album: "JRB Web Radio",
+                    artwork: [
+                        { src: 'logo.svg', sizes: '512x512', type: 'image/svg+xml' }
+                    ]
+                });
+
+                // Define estado ativo no SO
+                navigator.mediaSession.playbackState = playbackState === 'playing' ? 'playing' : 'paused';
+            }
+        }
+
+        function initMediaSessionActionHandlers() {
+            if ('mediaSession' in navigator) {
+                // Play nativo (Bloqueio de tela / Fone)
+                navigator.mediaSession.setActionHandler('play', () => {
+                    connectAndPlay();
+                });
+                
+                // Pause nativo
+                navigator.mediaSession.setActionHandler('pause', () => {
+                    pausePlayback();
+                });
+                
+                // Stop nativo
+                navigator.mediaSession.setActionHandler('stop', () => {
+                    pausePlayback();
+                });
+                
+                // Estação Anterior nativo
+                navigator.mediaSession.setActionHandler('previoustrack', () => {
+                    selectStation(currentStationIndex - 1);
+                });
+                
+                // Próxima Estação nativo
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    selectStation(currentStationIndex + 1);
+                });
+            }
+        }
+
+        // =========================================================================
+        // PROGRESSIVE WEB APP (PWA) SUPPORT & INSTALL BUTTON
+        // =========================================================================
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        // Escuta o gatilho de instalação nativa do navegador
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Exibe o botão premium de instalação
+            installBtn.style.display = 'inline-flex';
+        });
+
+        installBtn.addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('O usuário aceitou a instalação do JRB Web Radio');
+                    }
+                    deferredPrompt = null;
+                    installBtn.style.display = 'none';
+                });
+            }
+        });
+
+        // Remove o botão se o app for instalado com sucesso
+        window.addEventListener('appinstalled', () => {
+            console.log('JRB Web Radio foi instalado com sucesso como PWA!');
+            installBtn.style.display = 'none';
+        });
+
+        // Registro do Service Worker para suporte Offline e Segundo Plano Resiliente
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((reg) => {
+                        console.log('PWA Service Worker registrado com escopo:', reg.scope);
+                    })
+                    .catch((err) => {
+                        console.error('Falha ao registrar PWA Service Worker:', err);
+                    });
+            });
+        }
+
+        // =========================================================================
+        // INICIALIZAÇÃO DA APLICAÇÃO (ON LOAD)
+        // =========================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            // Carrega rádio anterior preferida salva no celular
+            const lastStation = localStorage.getItem('jrb_last_station');
+            if (lastStation !== null && parseInt(lastStation) < STATIONS.length) {
+                currentStationIndex = parseInt(lastStation);
+            }
+
+            // Carrega volume anterior salvo
+            const localVolume = localStorage.getItem('jrb_volume');
+            if (localVolume !== null) {
+                savedVolume = parseFloat(localVolume);
+                volumeSlider.value = savedVolume;
+            }
+
+            // Inicializa componentes visuais
+            initStationCards();
+            updateVolume(savedVolume);
+            activeStationTitle.textContent = STATIONS[currentStationIndex].name;
+            
+            // Define estado pronto inicial
+            setPlaybackState('idle');
+            
+            // Registra listeners de controle remoto de áudio do SO
+            initMediaSessionActionHandlers();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "JRB Web Radio Player",
+  "short_name": "JRB Player",
+  "description": "Player de Rádio Web Premium da JRB com alta resiliência e suporte a segundo plano.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05080c",
+  "theme_color": "#00ffcc",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
