@@ -5,19 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JRB Player de Rádio - Premium</title>
-    
+
     <!-- Manifesto PWA e Metas para Mobile -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00ffcc">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="logo.svg">
-    
+
     <!-- Tipografia Premium -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <style>
         /* Design Tokens & Sistema de Cores (HSL Tailored) */
         :root {
@@ -87,8 +88,13 @@
         }
 
         @keyframes drift {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(60px, 40px) scale(1.15); }
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(60px, 40px) scale(1.15);
+            }
         }
 
         /* Container Principal do Player (Responsivo / Glassmorphism) */
@@ -101,8 +107,8 @@
             padding: 35px 25px;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             text-align: center;
             z-index: 10;
             position: relative;
@@ -141,7 +147,8 @@
         }
 
         .btn-install {
-            display: none; /* Exibido dinamicamente se elegível para PWA */
+            display: none;
+            /* Exibido dinamicamente se elegível para PWA */
             align-items: center;
             gap: 6px;
             padding: 6px 14px;
@@ -187,32 +194,66 @@
         .player-card.state-playing .eq-bar {
             animation: eqBounce 1.2s ease-in-out infinite alternate;
         }
-        .player-card.state-playing .eq-bar:nth-child(1) { animation-delay: 0.15s; }
-        .player-card.state-playing .eq-bar:nth-child(2) { animation-delay: 0.45s; }
-        .player-card.state-playing .eq-bar:nth-child(3) { animation-delay: 0.25s; }
-        .player-card.state-playing .eq-bar:nth-child(4) { animation-delay: 0.65s; }
-        .player-card.state-playing .eq-bar:nth-child(5) { animation-delay: 0.35s; }
-        .player-card.state-playing .eq-bar:nth-child(6) { animation-delay: 0.55s; }
-        .player-card.state-playing .eq-bar:nth-child(7) { animation-delay: 0.10s; }
+
+        .player-card.state-playing .eq-bar:nth-child(1) {
+            animation-delay: 0.15s;
+        }
+
+        .player-card.state-playing .eq-bar:nth-child(2) {
+            animation-delay: 0.45s;
+        }
+
+        .player-card.state-playing .eq-bar:nth-child(3) {
+            animation-delay: 0.25s;
+        }
+
+        .player-card.state-playing .eq-bar:nth-child(4) {
+            animation-delay: 0.65s;
+        }
+
+        .player-card.state-playing .eq-bar:nth-child(5) {
+            animation-delay: 0.35s;
+        }
+
+        .player-card.state-playing .eq-bar:nth-child(6) {
+            animation-delay: 0.55s;
+        }
+
+        .player-card.state-playing .eq-bar:nth-child(7) {
+            animation-delay: 0.10s;
+        }
 
         .player-card.state-connecting .eq-bar,
         .player-card.state-reconnecting .eq-bar {
             animation: eqPulse 1s ease-in-out infinite alternate;
             background: linear-gradient(to top, var(--secondary), var(--warning));
         }
+
         .player-card.state-connecting .eq-bar:nth-child(even),
         .player-card.state-reconnecting .eq-bar:nth-child(even) {
             animation-delay: 0.5s;
         }
 
         @keyframes eqBounce {
-            0% { transform: scaleY(0.15); }
-            100% { transform: scaleY(1); }
+            0% {
+                transform: scaleY(0.15);
+            }
+
+            100% {
+                transform: scaleY(1);
+            }
         }
 
         @keyframes eqPulse {
-            0% { transform: scaleY(0.2); opacity: 0.4; }
-            100% { transform: scaleY(0.55); opacity: 1; }
+            0% {
+                transform: scaleY(0.2);
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: scaleY(0.55);
+                opacity: 1;
+            }
         }
 
         /* Detalhes da Estação Ativa */
@@ -252,19 +293,30 @@
         .player-card.state-playing .live-dot {
             animation: indicatorGlow 1.2s infinite alternate;
         }
+
         .player-card.state-connecting .live-dot,
         .player-card.state-reconnecting .live-dot {
             background-color: var(--warning);
             animation: indicatorGlow 0.6s infinite alternate;
         }
+
         .player-card.state-paused .live-dot,
         .player-card.state-idle .live-dot {
             background-color: var(--text-muted);
         }
 
         @keyframes indicatorGlow {
-            0% { transform: scale(0.9); opacity: 0.4; box-shadow: 0 0 0 rgba(0, 255, 204, 0); }
-            100% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 8px var(--primary); }
+            0% {
+                transform: scale(0.9);
+                opacity: 0.4;
+                box-shadow: 0 0 0 rgba(0, 255, 204, 0);
+            }
+
+            100% {
+                transform: scale(1.3);
+                opacity: 1;
+                box-shadow: 0 0 8px var(--primary);
+            }
         }
 
         /* Lista Premium de Estações (Custom Cards) */
@@ -292,14 +344,17 @@
         .stations-grid::-webkit-scrollbar {
             width: 4px;
         }
+
         .stations-grid::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.02);
             border-radius: 10px;
         }
+
         .stations-grid::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.15);
             border-radius: 10px;
         }
+
         .stations-grid::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.3);
         }
@@ -443,6 +498,7 @@
             background: linear-gradient(135deg, var(--danger), var(--warning));
             box-shadow: 0 8px 25px var(--danger-glow);
         }
+
         .player-card.state-playing .btn-play:hover {
             box-shadow: 0 10px 30px rgba(255, 78, 80, 0.6);
         }
@@ -454,12 +510,25 @@
             transition: transform 0.3s ease;
         }
 
-        .btn-play svg.play-icon { display: block; }
-        .btn-play svg.pause-icon { display: none; }
-        .btn-play .btn-spinner { display: none; }
+        .btn-play svg.play-icon {
+            display: block;
+        }
 
-        .player-card.state-playing .btn-play svg.play-icon { display: none; }
-        .player-card.state-playing .btn-play svg.pause-icon { display: block; }
+        .btn-play svg.pause-icon {
+            display: none;
+        }
+
+        .btn-play .btn-spinner {
+            display: none;
+        }
+
+        .player-card.state-playing .btn-play svg.play-icon {
+            display: none;
+        }
+
+        .player-card.state-playing .btn-play svg.pause-icon {
+            display: block;
+        }
 
         /* Estado carregando / conectando */
         .player-card.state-connecting .btn-play svg.play-icon,
@@ -468,7 +537,7 @@
         .player-card.state-reconnecting .btn-play svg.pause-icon {
             display: none;
         }
-        
+
         .player-card.state-connecting .btn-play .btn-spinner,
         .player-card.state-reconnecting .btn-play .btn-spinner {
             display: block;
@@ -477,14 +546,16 @@
         .btn-spinner {
             width: 30px;
             height: 30px;
-            border: 3.5px solid rgba(0,0,0,0.15);
+            border: 3.5px solid rgba(0, 0, 0, 0.15);
             border-radius: 50%;
             border-top-color: var(--bg-color-2);
             animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Pulsar circular de fundo sob o Play */
@@ -504,6 +575,7 @@
             animation: rippleGlow 2s infinite cubic-bezier(0.24, 0, 0.38, 1);
             background-color: var(--danger);
         }
+
         .player-card.state-connecting .play-pulse-ring,
         .player-card.state-reconnecting .play-pulse-ring {
             animation: rippleGlow 1s infinite alternate cubic-bezier(0.24, 0, 0.38, 1);
@@ -511,8 +583,15 @@
         }
 
         @keyframes rippleGlow {
-            0% { transform: scale(1); opacity: 0.55; }
-            100% { transform: scale(1.4); opacity: 0; }
+            0% {
+                transform: scale(1);
+                opacity: 0.55;
+            }
+
+            100% {
+                transform: scale(1.4);
+                opacity: 0;
+            }
         }
 
         /* Controle de Volume Dinâmico */
@@ -522,10 +601,10 @@
             justify-content: center;
             gap: 12px;
             margin-bottom: 20px;
-            background: rgba(0,0,0,0.15);
+            background: rgba(0, 0, 0, 0.15);
             padding: 8px 18px;
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.03);
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
         .volume-btn {
@@ -571,7 +650,7 @@
             border-radius: 50%;
             background: var(--text-light);
             border: none;
-            box-shadow: 0 0 6px rgba(0,0,0,0.5);
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
             transition: transform 0.15s ease, background 0.15s ease;
         }
 
@@ -593,6 +672,7 @@
         .player-card.state-error .status-message {
             color: var(--danger);
         }
+
         .player-card.state-connecting .status-message,
         .player-card.state-reconnecting .status-message {
             color: var(--warning);
@@ -684,7 +764,7 @@
     <div class="ambient-glow-2"></div>
 
     <div id="playerCard" class="player-card state-idle">
-        
+
         <!-- Header -->
         <div class="player-header">
             <div class="player-logo">
@@ -695,8 +775,10 @@
                             <stop offset="100%" stop-color="#0099ff" />
                         </linearGradient>
                     </defs>
-                    <circle cx="256" cy="256" r="240" fill="none" stroke="url(#logo-mini-grad)" stroke-width="24" opacity="0.3"/>
-                    <path d="M 176 256 A 80 80 0 0 1 336 256" fill="none" stroke="url(#logo-mini-grad)" stroke-width="24" stroke-linecap="round" />
+                    <circle cx="256" cy="256" r="240" fill="none" stroke="url(#logo-mini-grad)" stroke-width="24"
+                        opacity="0.3" />
+                    <path d="M 176 256 A 80 80 0 0 1 336 256" fill="none" stroke="url(#logo-mini-grad)"
+                        stroke-width="24" stroke-linecap="round" />
                     <rect x="146" y="226" width="30" height="70" rx="12" fill="url(#logo-mini-grad)" />
                     <rect x="336" y="226" width="30" height="70" rx="12" fill="url(#logo-mini-grad)" />
                     <polygon points="220,206 310,256 220,306" fill="url(#logo-mini-grad)" />
@@ -704,7 +786,12 @@
                 <span class="player-logo-text">JRB Web Radio</span>
             </div>
             <button id="installBtn" class="btn-install">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
                 Instalar
             </button>
         </div>
@@ -737,10 +824,11 @@
 
         <!-- Seletor Nativo mantido oculto -->
         <select id="stationSelect">
-            <option value="http://cast.radiu.live:6776/stream">Rádio Jaraguar FM - JRB</option>
-            <option value="https://29306.live.streamtheworld.com:443/RADIOTRANSMUNDIALAAC_SC">RTM - Rádio Trans Mundial - JRB</option>
+            <option value="https://29306.live.streamtheworld.com:443/RADIOTRANSMUNDIALAAC_SC">RTM - Rádio Trans Mundial
+                - JRB</option>
             <option value="https://sc4s.cdn.upx.com:9000/stream">Rádio IPB - JRB</option>
             <option value="https://sc4s.cdn.upx.com:8270/stream">Rádio Pinheiros - JRB</option>
+            <option value="http://cast.radiu.live:6776/stream">Rádio Jaraguar FM - JRB</option>
         </select>
 
         <!-- Controle de Volume -->
@@ -750,15 +838,20 @@
                     <!-- Path populado por JS -->
                 </svg>
             </button>
-            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Ajustar Volume">
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.8"
+                aria-label="Ajustar Volume">
         </div>
 
         <!-- Controles de Player -->
         <div class="controls-row">
             <button id="prevBtn" class="btn-nav" aria-label="Estação Anterior">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                    <line x1="5" y1="19" x2="5" y2="5"></line>
+                </svg>
             </button>
-            
+
             <div class="btn-play-outer">
                 <div class="play-pulse-ring"></div>
                 <button id="playBtn" class="btn-play" aria-label="Play/Pause">
@@ -776,7 +869,11 @@
             </div>
 
             <button id="nextBtn" class="btn-nav" aria-label="Próxima Estação">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                    <line x1="19" y1="5" x2="19" y2="19"></line>
+                </svg>
             </button>
         </div>
 
@@ -788,16 +885,6 @@
         // Array Estruturado de Estações para Fácil Controle
         const STATIONS = [
             {
-                name: "Rádio Jaraguar FM",
-                details: "JRB - Jacobina / BA",
-                url: "https://cast.radiu.live:6776/stream"
-            },
-            {
-                name: "Rádio Trans Mundial",
-                details: "RTM - Programação Nacional",
-                url: "https://29306.live.streamtheworld.com:443/RADIOTRANSMUNDIALAAC_SC"
-            },
-            {
                 name: "Rádio IPB",
                 details: "Igreja Presbiteriana do Brasil",
                 url: "https://sc4s.cdn.upx.com:9000/stream"
@@ -806,6 +893,16 @@
                 name: "Rádio Pinheiros",
                 details: "Igreja Presbiteriana de Pinheiros",
                 url: "https://sc4s.cdn.upx.com:8270/stream"
+            },
+            {
+                name: "Rádio Trans Mundial",
+                details: "RTM - Programação Nacional",
+                url: "https://29306.live.streamtheworld.com:443/RADIOTRANSMUNDIALAAC_SC"
+            },
+            {
+                name: "Rádio Jaraguar FM",
+                details: "JRB - Jacobina / BA",
+                url: "https://cast.radiu.live:6776/stream"
             }
         ];
 
@@ -844,7 +941,7 @@
                 const card = document.createElement('div');
                 card.className = `station-card ${index === currentStationIndex ? 'active' : ''}`;
                 card.setAttribute('data-index', index);
-                
+
                 card.innerHTML = `
                     <div class="station-card-info">
                         <h3>${station.name}</h3>
@@ -852,11 +949,11 @@
                     </div>
                     <div class="station-card-indicator"></div>
                 `;
-                
+
                 card.addEventListener('click', () => {
                     selectStation(index);
                 });
-                
+
                 stationsGrid.appendChild(card);
             });
 
@@ -871,7 +968,7 @@
         function setPlaybackState(state) {
             playbackState = state;
             playerCard.className = `player-card state-${state}`;
-            
+
             // Textos amigáveis para cada estado
             switch (state) {
                 case 'idle':
@@ -909,9 +1006,9 @@
             if (index >= STATIONS.length) index = 0;
 
             const wasPlaying = playbackState === 'playing' || playbackState === 'connecting' || playbackState === 'reconnecting';
-            
+
             currentStationIndex = index;
-            
+
             // Atualiza seleção visual dos cards
             const cards = stationsGrid.querySelectorAll('.station-card');
             cards.forEach((card, idx) => {
@@ -930,7 +1027,7 @@
 
             // Atualiza título ativo
             activeStationTitle.textContent = STATIONS[currentStationIndex].name;
-            
+
             // Salva a última rádio selecionada localmente
             localStorage.setItem('jrb_last_station', currentStationIndex);
 
@@ -948,7 +1045,7 @@
         // Conectar e Iniciar Stream
         function connectAndPlay() {
             setPlaybackState('connecting');
-            
+
             // CRUCIAL: Liberar stream anterior antes de conectar ao novo
             audioPlayer.src = '';
             audioPlayer.load();
@@ -956,9 +1053,9 @@
             // Define nova fonte
             const streamUrl = STATIONS[currentStationIndex].url;
             audioPlayer.src = streamUrl;
-            
+
             console.log(`Conectando a: ${STATIONS[currentStationIndex].name} - ${streamUrl}`);
-            
+
             audioPlayer.play()
                 .then(() => {
                     setPlaybackState('playing');
@@ -974,13 +1071,13 @@
         // Interromper a reprodução e fechar a conexão de rede
         function pausePlayback() {
             audioPlayer.pause();
-            
+
             // CRUCIAL: Resiliência em conexões móveis!
             // Rádios web transmitem streams contínuos. Apenas pausar deixa o buffer de rede aberto.
             // Para economizar dados móveis e processamento de background no celular, liberamos o SRC.
             audioPlayer.src = '';
             audioPlayer.load();
-            
+
             setPlaybackState('paused');
             clearTimeout(reconnectTimeoutId);
             reconnectAttempts = 0;
@@ -997,17 +1094,17 @@
 
             reconnectAttempts++;
             setPlaybackState('reconnecting');
-            
+
             // Calcula o atraso com Backoff Exponencial (ex: 2s, 4s, 8s, 16s...)
             const delay = Math.min(Math.pow(2, reconnectAttempts) * 1000, 30000);
-            
-            statusText.textContent = `Sinal oscilou. Reconectando em ${delay/1000}s... (Tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`;
-            
+
+            statusText.textContent = `Sinal oscilou. Reconectando em ${delay / 1000}s... (Tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`;
+
             // Executa tentativa após o atraso calculado
             clearTimeout(reconnectTimeoutId);
             reconnectTimeoutId = setTimeout(() => {
                 console.log(`Tentando reconectar (Tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
-                
+
                 audioPlayer.src = STATIONS[currentStationIndex].url;
                 audioPlayer.play()
                     .then(() => {
@@ -1070,17 +1167,17 @@
         // Controle de Volume Premium
         function updateVolume(val) {
             audioPlayer.volume = val;
-            
+
             // Atualiza estilo linear visual no Slider
             const percent = val * 100;
             volumeSlider.style.backgroundImage = `linear-gradient(90deg, var(--primary) ${percent}%, rgba(255,255,255,0.1) ${percent}%)`;
-            
+
             // Salva o volume preferido localmente
             if (!isMuted) {
                 savedVolume = val;
                 localStorage.setItem('jrb_volume', val);
             }
-            
+
             // Atualiza ícone do botão dinamicamente
             if (val === 0 || isMuted) {
                 // Ícone Mudo
@@ -1118,7 +1215,7 @@
         function updateMediaSession() {
             if ('mediaSession' in navigator) {
                 const activeStation = STATIONS[currentStationIndex];
-                
+
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: activeStation.name,
                     artist: "Rádio Ao Vivo",
@@ -1139,22 +1236,22 @@
                 navigator.mediaSession.setActionHandler('play', () => {
                     connectAndPlay();
                 });
-                
+
                 // Pause nativo
                 navigator.mediaSession.setActionHandler('pause', () => {
                     pausePlayback();
                 });
-                
+
                 // Stop nativo
                 navigator.mediaSession.setActionHandler('stop', () => {
                     pausePlayback();
                 });
-                
+
                 // Estação Anterior nativo
                 navigator.mediaSession.setActionHandler('previoustrack', () => {
                     selectStation(currentStationIndex - 1);
                 });
-                
+
                 // Próxima Estação nativo
                 navigator.mediaSession.setActionHandler('nexttrack', () => {
                     selectStation(currentStationIndex + 1);
@@ -1229,10 +1326,10 @@
             initStationCards();
             updateVolume(savedVolume);
             activeStationTitle.textContent = STATIONS[currentStationIndex].name;
-            
+
             // Define estado pronto inicial
             setPlaybackState('idle');
-            
+
             // Registra listeners de controle remoto de áudio do SO
             initMediaSessionActionHandlers();
 
@@ -1263,21 +1360,36 @@
     <div id="iosInstallBanner" class="ios-install-banner">
         <div class="ios-banner-icon">
             <svg width="22" height="22" viewBox="0 0 512 512">
-                <circle cx="256" cy="256" r="240" fill="none" stroke="currentColor" stroke-width="32" opacity="0.3"/>
-                <path d="M 176 256 A 80 80 0 0 1 336 256" fill="none" stroke="currentColor" stroke-width="32" stroke-linecap="round" />
+                <circle cx="256" cy="256" r="240" fill="none" stroke="currentColor" stroke-width="32" opacity="0.3" />
+                <path d="M 176 256 A 80 80 0 0 1 336 256" fill="none" stroke="currentColor" stroke-width="32"
+                    stroke-linecap="round" />
                 <rect x="146" y="226" width="30" height="70" rx="12" fill="currentColor" />
                 <rect x="336" y="226" width="30" height="70" rx="12" fill="currentColor" />
                 <polygon points="220,206 310,256 220,306" fill="currentColor" />
             </svg>
         </div>
         <div class="ios-banner-text">
-            Para instalar no seu iPhone: toque no ícone de **Compartilhar** 
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #0099ff; display: inline-block; vertical-align: middle;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> 
-            e selecione **Adicionar à Tela de Início** 
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #00ffcc; display: inline-block; vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>.
+            Para instalar no seu iPhone: toque no ícone de **Compartilhar**
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                style="color: #0099ff; display: inline-block; vertical-align: middle;">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16 6 12 2 8 6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+            </svg>
+            e selecione **Adicionar à Tela de Início**
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                style="color: #00ffcc; display: inline-block; vertical-align: middle;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>.
         </div>
         <button id="closeIosBanner" class="ios-banner-close" aria-label="Fechar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
         </button>
     </div>
 </body>
