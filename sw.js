@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jrb-radio-v1';
+const CACHE_NAME = 'jrb-radio-v2';
 const ASSETS_TO_CACHE = [
   './index.html',
   './manifest.json',
