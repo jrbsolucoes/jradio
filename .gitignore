@@ -1,0 +1,19 @@
+# Pastas de Backup locais
+BKP/
+BKP*
+
+# Ignorar o arquivo README.md (conforme solicitado)
+README.md
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Configurações de editores de código
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
