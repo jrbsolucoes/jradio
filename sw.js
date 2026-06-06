@@ -1,10 +1,11 @@
-const CACHE_NAME = 'jrb-radio-v4';
+const CACHE_NAME = 'jrb-radio-v6';
 const ASSETS_TO_CACHE = [
   './index.html',
   './manifest.json',
   './logo.svg',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './firebase-config.js'
 ];
 
 // Instala o Service Worker e adiciona assets estáticos ao cache

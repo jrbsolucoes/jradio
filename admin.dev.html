@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - JRB Web Radio</title>
+    
+    <!-- Tipografia Premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Design Tokens & Sistema de Cores (HSL Tailored) idênticos ao player */
+        :root {
+            --bg-color-1: #0b131a;
+            --bg-color-2: #05080c;
+            --primary: #00ffcc;
+            --primary-glow: rgba(0, 255, 204, 0.4);
+            --secondary: #0099ff;
+            --secondary-glow: rgba(0, 153, 255, 0.4);
+            --danger: #ff4e50;
+            --danger-glow: rgba(255, 78, 80, 0.4);
+            --warning: #f9d423;
+            --text-light: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color-2);
+            background-image: radial-gradient(circle at 10% 20%, var(--bg-color-1) 0%, var(--bg-color-2) 90%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-light);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Efeitos de Luzes Flutuantes no Fundo (Ambient Glow) */
+        .ambient-glow-1 {
+            position: absolute;
+            top: 10%;
+            left: 5%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            bottom: 10%;
+            right: 5%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, var(--secondary-glow) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Container Principal do Painel (Glassmorphism) */
+        .admin-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 35px 25px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            z-index: 10;
+            position: relative;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .admin-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.35rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+        }
+
+        .admin-logo-text {
+            background: linear-gradient(135deg, var(--text-light) 30%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .admin-logo-icon {
+            width: 28px;
+            height: 28px;
+            filter: drop-shadow(0 0 6px var(--primary-glow));
+        }
+
+        .admin-title {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Formulários e Inputs Premium */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.25);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 16px;
+            padding-right: 45px;
+            cursor: pointer;
+        }
+
+        select.form-control option {
+            background-color: var(--bg-color-1);
+            color: var(--text-light);
+        }
+
+        /* Botões */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--bg-color-2);
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        .btn-danger {
+            background: rgba(255, 78, 80, 0.15);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: var(--text-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--danger-glow);
+        }
+
+        .btn-logout {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            color: var(--danger);
+            filter: drop-shadow(0 0 4px var(--danger-glow));
+        }
+
+        /* Botão do Google */
+        .btn-google-login {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 20px;
+            background: #ffffff;
+            color: #1c1f23;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.3px;
+        }
+
+        .btn-google-login:hover {
+            background: #f3f4f6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-google-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-google-login:disabled {
+            background: #4b5563;
+            color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Indicador de Status do Painel */
+        .status-badge {
+            margin-top: 25px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            display: inline-block;
+        }
+
+        .status-dot.active {
+            background: var(--primary);
+            box-shadow: 0 0 8px var(--primary);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .btn-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <!-- 1. Tela de Carregamento Inicial -->
+    <div id="loadingSection" class="admin-card" style="text-align: center; padding: 50px 25px;">
+        <div class="admin-header">
+            <div class="admin-logo">
+                <img class="admin-logo-icon" src="logo.svg" alt="JRB Logo">
+                <span class="admin-logo-text">JRB Web Radio</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">Verificando conexão segura...</p>
+        </div>
+        <div class="btn-spinner" style="margin: 0 auto;"></div>
+    </div>
+
+    <!-- 2. Tela de Login com Google -->
+    <div id="loginSection" class="admin-card" style="display: none; text-align: center;">
+        <div class="admin-header">
+            <div class="admin-logo">
+                <img class="admin-logo-icon" src="logo.svg" alt="JRB Logo">
+                <span class="admin-logo-text">Acesso Restrito</span>
+            </div>
+            <h1 class="admin-title">Painel de Controle da Rádio</h1>
+        </div>
+
+        <div style="margin: 30px 0;">
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px;">Autentique-se com sua conta Google Administradora para continuar.</p>
+            <button id="btnGoogleLogin" class="btn-google-login">
+                <svg viewBox="0 0 24 24" width="20" height="20" style="display: block;">
+                    <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.859-3.578-7.859-8s3.53-8 7.859-8c2.46 0 4.105 1.025 5.047 1.926l3.247-3.123C18.29 2.15 15.439 1 12.24 1 6.033 1 1 6.033 1 12.24s5.033 11.24 11.24 11.24c6.478 0 10.793-4.537 10.793-10.985 0-.746-.08-1.32-.176-1.886H12.24z"/>
+                </svg>
+                Entrar com o Google
+            </button>
+        </div>
+
+        <div id="loginError" class="status-badge" style="display: none; border-color: var(--danger); color: var(--danger);">
+            <span class="status-dot" style="background: var(--danger); box-shadow: 0 0 8px var(--danger-glow);"></span>
+            <span id="loginErrorText">Acesso não autorizado</span>
+        </div>
+    </div>
+
+    <!-- 3. Container do Dashboard Administrativo -->
+    <div id="dashboardSection" class="admin-card" style="display: none;">
+        <div class="admin-header">
+            <div class="admin-logo" style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img class="admin-logo-icon" src="logo.svg" alt="JRB Logo">
+                    <span class="admin-logo-text">JRB Web Radio</span>
+                </div>
+                <button id="btnLogout" class="btn-logout" title="Sair do Painel">
+                    <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24">
+                        <path d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 0 1 2 2v2h-2V4H5v16h9v-2h2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9z"/>
+                    </svg>
+                    Sair
+                </button>
+            </div>
+            <h1 class="admin-title" style="text-align: left; margin-top: 5px;">Painel de Comunicação ao Vivo</h1>
+        </div>
+
+        <form id="communicationForm" onsubmit="return false;">
+            <div class="form-group">
+                <label class="form-label" for="mediaType">Tipo de Mídia</label>
+                <select class="form-control" id="mediaType">
+                    <option value="text">Texto Informativo</option>
+                    <option value="image">Imagem / GIF Animado</option>
+                    <option value="video">Vídeo Animado (MP4)</option>
+                    <option value="youtube">Vídeo do YouTube</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="mediaContent" id="labelContent">Mensagem de Texto</label>
+                <input class="form-control" type="text" id="mediaContent" placeholder="Digite a mensagem para o ouvinte..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="linkUrl">Link de Destino (Opcional)</label>
+                <input class="form-control" type="url" id="linkUrl" placeholder="https://exemplo.com/promocao">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="duration">Tempo de Exibição (Segundos)</label>
+                <input class="form-control" type="number" id="duration" min="0" value="0" placeholder="0 para infinito">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-danger" type="button" id="btnRemove">Remover</button>
+                <button class="btn btn-primary" type="submit" id="btnSend">Enviar ao Player</button>
+            </div>
+        </form>
+
+        <div class="status-badge">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Nenhuma comunicação ativa no momento</span>
+        </div>
+    </div>
+
+    <!-- Lógica de Integração com Firebase Realtime Database e Auth -->
+    <script type="module">
+        import { 
+            set, 
+            liveDisplayRef, 
+            onValue, 
+            auth, 
+            GoogleAuthProvider,
+            signInWithPopup,
+            signOut, 
+            onAuthStateChanged 
+        } from './firebase-config.dev.js';
+
+        // CONFIGURAÇÃO: Coloque aqui os e-mails autorizados do Google.
+        // Se a sua conta administrativa for outra, basta adicionar à lista.
+        const ALLOWED_EMAILS = [
+            "jrbwebradio@gmail.com",
+            "jrbsolucoesweb@gmail.com",
+            "jrbsolucoes@gmail.com"
+        ];
+
+        const loadingSection = document.getElementById('loadingSection');
+        const loginSection = document.getElementById('loginSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        
+        const btnGoogleLogin = document.getElementById('btnGoogleLogin');
+        const loginError = document.getElementById('loginError');
+        const loginErrorText = document.getElementById('loginErrorText');
+        const btnLogout = document.getElementById('btnLogout');
+
+        const form = document.getElementById('communicationForm');
+        const mediaType = document.getElementById('mediaType');
+        const mediaContent = document.getElementById('mediaContent');
+        const labelContent = document.getElementById('labelContent');
+        const linkUrl = document.getElementById('linkUrl');
+        const duration = document.getElementById('duration');
+        
+        const btnSend = document.getElementById('btnSend');
+        const btnRemove = document.getElementById('btnRemove');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        // 1. Controle de Sessão com Firebase Auth e Validação de E-mail
+        onAuthStateChanged(auth, (user) => {
+            loadingSection.style.display = 'none';
+            if (user) {
+                const email = user.email ? user.email.toLowerCase() : "";
+                const isAllowed = ALLOWED_EMAILS.some(allowed => allowed.toLowerCase() === email);
+
+                if (isAllowed) {
+                    loginSection.style.display = 'none';
+                    dashboardSection.style.display = 'block';
+                    loginError.style.display = 'none';
+                } else {
+                    // Usuário logado mas sem permissão
+                    loginError.style.display = 'flex';
+                    loginErrorText.textContent = `Acesso negado: O e-mail "${email}" não é um administrador autorizado.`;
+                    loginSection.style.display = 'block';
+                    dashboardSection.style.display = 'none';
+                    
+                    // Desloga automaticamente para evitar retenção de sessão inválida
+                    signOut(auth).catch(err => console.error("Erro ao limpar sessão não autorizada:", err));
+                }
+            } else {
+                loginSection.style.display = 'block';
+                dashboardSection.style.display = 'none';
+            }
+        });
+
+        // Evento de Login com Google
+        btnGoogleLogin.addEventListener('click', () => {
+            btnGoogleLogin.disabled = true;
+            btnGoogleLogin.innerHTML = `
+                <div class="btn-spinner" style="width: 18px; height: 18px; border-width: 2px; border-top-color: #1c1f23; margin: 0;"></div>
+                Conectando ao Google...
+            `;
+            loginError.style.display = 'none';
+
+            const provider = new GoogleAuthProvider();
+            // Garante que o Google solicite a seleção de conta se necessário
+            provider.setCustomParameters({ prompt: 'select_account' });
+
+            signInWithPopup(auth, provider)
+                .catch((error) => {
+                    console.error("Erro na autenticação Google:", error);
+                    loginError.style.display = 'flex';
+                    let errorMsg = "Erro ao conectar com a conta Google.";
+                    if (error.code === 'auth/popup-closed-by-user') {
+                        errorMsg = "Login cancelado pelo usuário.";
+                    } else if (error.code === 'auth/blocked-by-popup-toggler') {
+                        errorMsg = "O bloqueador de popups impediu o login.";
+                    }
+                    loginErrorText.textContent = errorMsg;
+                })
+                .finally(() => {
+                    btnGoogleLogin.disabled = false;
+                    btnGoogleLogin.innerHTML = `
+                        <svg viewBox="0 0 24 24" width="20" height="20" style="display: block;">
+                            <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.859-3.578-7.859-8s3.53-8 7.859-8c2.46 0 4.105 1.025 5.047 1.926l3.247-3.123C18.29 2.15 15.439 1 12.24 1 6.033 1 1 6.033 1 12.24s5.033 11.24 11.24 11.24c6.478 0 10.793-4.537 10.793-10.985 0-.746-.08-1.32-.176-1.886H12.24z"/>
+                        </svg>
+                        Entrar com o Google
+                    `;
+                });
+        });
+
+        // Evento de Logout
+        btnLogout.addEventListener('click', () => {
+            if (confirm("Deseja sair do painel administrativo?")) {
+                signOut(auth).catch((err) => {
+                    console.error("Erro ao desautenticar:", err);
+                });
+            }
+        });
+
+        // 2. Lógica do Dashboard de Comunicação
+        mediaType.addEventListener('change', () => {
+            const val = mediaType.value;
+            if (val === 'text') {
+                labelContent.textContent = "Mensagem de Texto";
+                mediaContent.placeholder = "Digite a mensagem para o ouvinte...";
+                mediaContent.type = "text";
+            } else if (val === 'image') {
+                labelContent.textContent = "URL da Imagem / GIF";
+                mediaContent.placeholder = "https://link-da-imagem.com/imagem.gif";
+                mediaContent.type = "url";
+            } else if (val === 'video') {
+                labelContent.textContent = "URL do Vídeo (MP4)";
+                mediaContent.placeholder = "https://link-do-video.com/video.mp4";
+                mediaContent.type = "url";
+            } else if (val === 'youtube') {
+                labelContent.textContent = "URL do Vídeo do YouTube";
+                mediaContent.placeholder = "https://www.youtube.com/watch?v=... ou https://youtu.be/...";
+                mediaContent.type = "url";
+            }
+        });
+
+        // Enviar dados para o Realtime Database
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!auth.currentUser) {
+                alert("Você precisa estar autenticado para realizar esta ação.");
+                return;
+            }
+
+            const payload = {
+                active: true,
+                type: mediaType.value,
+                content: mediaContent.value.trim(),
+                linkUrl: linkUrl.value.trim() || "",
+                duration: parseInt(duration.value) || 0
+            };
+
+            statusText.textContent = "Enviando comando...";
+
+            set(liveDisplayRef, payload)
+                .then(() => {
+                    statusText.textContent = "Publicado com sucesso no player!";
+                })
+                .catch((err) => {
+                    console.error("Erro ao publicar:", err);
+                    statusText.textContent = "Erro ao enviar: " + err.message;
+                });
+        });
+
+        // Remover comunicação do player
+        btnRemove.addEventListener('click', () => {
+            if (!auth.currentUser) {
+                alert("Você precisa estar autenticado para realizar esta ação.");
+                return;
+            }
+
+            const payload = {
+                active: false,
+                type: "image",
+                content: "",
+                linkUrl: "",
+                duration: 0
+            };
+
+            statusText.textContent = "Removendo comunicação...";
+
+            set(liveDisplayRef, payload)
+                .then(() => {
+                    statusText.textContent = "Comunicação removida!";
+                    form.reset();
+                    mediaType.dispatchEvent(new Event('change'));
+                })
+                .catch((err) => {
+                    console.error("Erro ao remover:", err);
+                    statusText.textContent = "Erro ao remover: " + err.message;
+                });
+        });
+
+        // Monitora o estado atual no Firebase para sincronizar o Painel
+        onValue(liveDisplayRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.active) {
+                statusDot.classList.add('active');
+                statusText.innerHTML = `<strong>Ativo:</strong> Exibindo ${data.type === 'text' ? 'texto' : data.type} no player.`;
+                
+                if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'SELECT') {
+                    mediaType.value = data.type;
+                    mediaType.dispatchEvent(new Event('change'));
+                    mediaContent.value = data.content;
+                    linkUrl.value = data.linkUrl || "";
+                    duration.value = data.duration || 0;
+                }
+            } else {
+                statusDot.classList.remove('active');
+                statusText.textContent = "Nenhuma comunicação ativa no momento.";
+            }
+        }, (error) => {
+            console.error("Erro ao ler status inicial:", error);
+            if (auth.currentUser) {
+                statusText.textContent = "Sem conexão com o Firebase (verifique as regras de segurança)";
+            }
+        });
+    </script>
+</body>
+</html>

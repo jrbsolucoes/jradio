@@ -171,6 +171,17 @@
             box-shadow: 0 0 12px var(--primary-glow);
         }
 
+        /* Área de Exibição de Mídia (Equalizador ou Comunicados) */
+        .media-display-area {
+            position: relative;
+            min-height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 25px 0;
+            width: 100%;
+        }
+
         /* Equalizador Visual Animado */
         .equalizer-container {
             display: flex;
@@ -178,7 +189,78 @@
             align-items: flex-end;
             gap: 6px;
             height: 45px;
-            margin: 25px 0;
+            width: 100%;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .equalizer-container.hidden {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        /* Container de Comunicação Dinâmica */
+        .communication-container {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .communication-container.active {
+            opacity: 1;
+            visibility: visible;
+            position: relative;
+        }
+
+        /* Estilos de mídia dinâmicos dentro do display */
+        .communication-container img,
+        .communication-container video,
+        .communication-container iframe {
+            max-width: 100%;
+            max-height: 150px;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.25), 0 8px 16px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .communication-container img:hover,
+        .communication-container video:hover,
+        .communication-container iframe:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.4), 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .communication-container a {
+            display: block;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* Bloco de texto informativo */
+        .comm-text-card {
+            background: rgba(251, 166, 50, 0.06);
+            border: 1px solid rgba(251, 166, 50, 0.3);
+            padding: 12px 18px;
+            border-radius: 12px;
+            color: rgb(251, 166, 50); /* #fba632 do print do usuário */
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.4;
+            text-align: center;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 
+                        0 4px 15px rgba(0, 0, 0, 0.3),
+                        0 0 10px rgba(251, 166, 50, 0.15);
+            width: 100%;
+            word-wrap: break-word;
         }
 
         .eq-bar {
@@ -424,6 +506,16 @@
             background-color: var(--bg-color-2);
             border-radius: 50%;
             display: block;
+        }
+
+        /* Bloqueio de interação quando vídeo do YouTube está ativo */
+        .player-card.media-active .stations-grid,
+        .player-card.media-active .controls-row {
+            pointer-events: none;
+            opacity: 0.35;
+            filter: grayscale(0.4);
+            cursor: not-allowed;
+            transition: all 0.3s ease;
         }
 
         /* Área de Controle (Botões Principais) */
@@ -797,15 +889,21 @@
             </button>
         </div>
 
-        <!-- Equalizador visual -->
-        <div class="equalizer-container">
-            <div class="eq-bar"></div>
-            <div class="eq-bar"></div>
-            <div class="eq-bar"></div>
-            <div class="eq-bar"></div>
-            <div class="eq-bar"></div>
-            <div class="eq-bar"></div>
-            <div class="eq-bar"></div>
+        <!-- Área de Exibição de Mídia (Equalizador ou Comunicados) -->
+        <div class="media-display-area">
+            <!-- Equalizador visual -->
+            <div class="equalizer-container" id="equalizerContainer">
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+            </div>
+
+            <!-- Container dinâmico de comunicação (oculto por padrão) -->
+            <div class="communication-container hidden" id="communicationContainer"></div>
         </div>
 
         <!-- Informações da Rádio ativa -->
@@ -1393,6 +1491,242 @@
             </svg>
         </button>
     </div>
+
+    <!-- Integração em Tempo Real com Firebase (Módulo de Comunicação) -->
+    <script type="module">
+        import { onValue, liveDisplayRef } from './firebase-config.js';
+
+        const equalizerContainer = document.getElementById('equalizerContainer');
+        const communicationContainer = document.getElementById('communicationContainer');
+        let autoCloseTimeout = null;
+        let countdownInterval = null;
+        let wasYouTubeActive = false;
+
+        function restoreStationDisplay() {
+            const activeStationTitle = document.getElementById('activeStationTitle');
+            const liveStatusText = document.getElementById('liveStatusText');
+            
+            if (activeStationTitle && typeof STATIONS !== 'undefined' && typeof currentStationIndex !== 'undefined') {
+                activeStationTitle.textContent = STATIONS[currentStationIndex].name;
+            }
+            if (liveStatusText && typeof playbackState !== 'undefined') {
+                switch (playbackState) {
+                    case 'idle':
+                        liveStatusText.textContent = "Pronto para reproduzir";
+                        break;
+                    case 'connecting':
+                        liveStatusText.textContent = "Conectando";
+                        break;
+                    case 'playing':
+                        liveStatusText.textContent = "Ao Vivo";
+                        break;
+                    case 'paused':
+                        liveStatusText.textContent = "Pausado";
+                        break;
+                    case 'reconnecting':
+                        liveStatusText.textContent = "Reconectando";
+                        break;
+                    case 'error':
+                        liveStatusText.textContent = "Sem Sinal";
+                        break;
+                    default:
+                        liveStatusText.textContent = "Ao Vivo";
+                }
+            }
+        }
+
+        function fetchYouTubeTitle(url, callback) {
+            const ytId = getYouTubeId(url);
+            if (!ytId) {
+                callback("Vídeo do YouTube");
+                return;
+            }
+            fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${ytId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.title) {
+                        callback(data.title);
+                    } else {
+                        callback("Vídeo do YouTube");
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro ao obter título do YouTube:", err);
+                    callback("Vídeo do YouTube");
+                });
+        }
+
+        function formatCountdownText(seconds) {
+            if (seconds <= 0) return "";
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            if (mins > 0) {
+                return `A programação retornará em ${mins}m ${secs}s`;
+            } else {
+                return `A programação retornará em ${secs}s`;
+            }
+        }
+
+        function hideCommunication() {
+            if (autoCloseTimeout) {
+                clearTimeout(autoCloseTimeout);
+                autoCloseTimeout = null;
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            if (communicationContainer) {
+                communicationContainer.innerHTML = '';
+                communicationContainer.classList.add('hidden');
+                communicationContainer.classList.remove('active');
+            }
+            if (equalizerContainer) {
+                equalizerContainer.classList.remove('hidden');
+            }
+            
+            // Reativa os controles e cliques de rádio
+            const playerCard = document.getElementById('playerCard');
+            if (playerCard) {
+                playerCard.classList.remove('media-active');
+            }
+
+            restoreStationDisplay();
+
+            // Retoma a reprodução da rádio automaticamente se um vídeo do YouTube estava ativo
+            if (wasYouTubeActive) {
+                wasYouTubeActive = false;
+                if (typeof connectAndPlay === 'function') {
+                    connectAndPlay();
+                }
+            }
+        }
+
+        function getYouTubeId(url) {
+            if (!url) return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function renderCommunication(data) {
+            if (autoCloseTimeout) {
+                clearTimeout(autoCloseTimeout);
+                autoCloseTimeout = null;
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+
+            if (!communicationContainer || !equalizerContainer) return;
+
+            // Oculta o equalizador
+            equalizerContainer.classList.add('hidden');
+
+            // Gerencia bloqueio de controles para vídeo do YouTube
+            const playerCard = document.getElementById('playerCard');
+            if (data.type === 'youtube') {
+                wasYouTubeActive = true;
+                
+                // Usa a função resiliente para pausar a rádio e economizar dados móveis
+                if (typeof pausePlayback === 'function') {
+                    pausePlayback();
+                } else if (typeof audioPlayer !== 'undefined' && !audioPlayer.paused) {
+                    audioPlayer.pause();
+                    if (typeof setPlaybackState === 'function') {
+                        setPlaybackState('paused');
+                    }
+                }
+                
+                // Adiciona o bloqueio de controles DEPOIS de pausar (para evitar que setPlaybackState remova a classe)
+                if (playerCard) playerCard.classList.add('media-active');
+            } else {
+                if (playerCard) playerCard.classList.remove('media-active');
+            }
+
+            // Renderiza o HTML dependendo do tipo de mídia
+            let contentHTML = '';
+            const linkStart = data.linkUrl ? `<a href="${data.linkUrl}" target="_blank" rel="noopener">` : '';
+            const linkEnd = data.linkUrl ? `</a>` : '';
+
+            if (data.type === 'text') {
+                contentHTML = `${linkStart}<div class="comm-text-card">${data.content}</div>${linkEnd}`;
+            } else if (data.type === 'image') {
+                contentHTML = `${linkStart}<img src="${data.content}" alt="Comunicado">${linkEnd}`;
+            } else if (data.type === 'video') {
+                contentHTML = `${linkStart}<video src="${data.content}" autoplay loop muted playsinline></video>${linkEnd}`;
+            } else if (data.type === 'youtube') {
+                const ytId = getYouTubeId(data.content);
+                if (ytId) {
+                    contentHTML = `${linkStart}<iframe width="100%" height="150" src="https://www.youtube.com/embed/${ytId}?autoplay=1&loop=1&playlist=${ytId}&controls=0&modestbranding=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 12px; border: 1px solid var(--glass-border); box-shadow: 0 0 20px rgba(0, 255, 204, 0.25);"></iframe>${linkEnd}`;
+                    
+                    // Exibe título temporário enquanto carrega do oEmbed
+                    const activeStationTitle = document.getElementById('activeStationTitle');
+                    if (activeStationTitle) {
+                        activeStationTitle.textContent = "Carregando título do vídeo...";
+                    }
+                    
+                    // Obtém o título real do vídeo via API
+                    fetchYouTubeTitle(data.content, (title) => {
+                        const currentActiveTitle = document.getElementById('activeStationTitle');
+                        // Garante que ainda estamos exibindo o vídeo do YouTube antes de atualizar
+                        if (currentActiveTitle && !communicationContainer.classList.contains('hidden')) {
+                            currentActiveTitle.textContent = title;
+                        }
+                    });
+                } else {
+                    contentHTML = `<div class="comm-text-card">URL de vídeo do YouTube inválida</div>`;
+                }
+            }
+
+            communicationContainer.innerHTML = contentHTML;
+            communicationContainer.classList.remove('hidden');
+            communicationContainer.classList.add('active');
+
+            // Agenda contagem regressiva e auto-fechamento se a duração for maior que 0
+            if (data.duration > 0) {
+                let remaining = data.duration;
+                const liveStatusText = document.getElementById('liveStatusText');
+                
+                if (liveStatusText) {
+                    liveStatusText.textContent = formatCountdownText(remaining);
+                }
+
+                countdownInterval = setInterval(() => {
+                    remaining--;
+                    if (remaining <= 0) {
+                        hideCommunication();
+                    } else {
+                        if (liveStatusText) {
+                            liveStatusText.textContent = formatCountdownText(remaining);
+                        }
+                    }
+                }, 1000);
+            } else {
+                // Se for infinito e for YouTube, muda o status para "Vídeo ao Vivo"
+                if (data.type === 'youtube') {
+                    const liveStatusText = document.getElementById('liveStatusText');
+                    if (liveStatusText) {
+                        liveStatusText.textContent = "Vídeo no Player";
+                    }
+                }
+            }
+        }
+
+        // Escuta o banco de dados em tempo real
+        onValue(liveDisplayRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.active) {
+                renderCommunication(data);
+            } else {
+                hideCommunication();
+            }
+        }, (error) => {
+            console.error("Erro ao ouvir o nó live_display no Firebase:", error);
+            hideCommunication(); // Fallback de segurança
+        });
+    </script>
 </body>
 
 </html>
