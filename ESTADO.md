@@ -85,7 +85,7 @@ Esta seção lista falhas mapeadas durante o desenvolvimento e como preveni-las:
 * ### Fechamento Imediato do Popup de Login (Domínio Não Autorizado)
   * **Sintoma**: A janela de login do Google abre e fecha rapidamente, gerando erro de conexão.
   * **Causa**: O endereço usado para acessar a página (ex: `http://127.0.0.1:3000`) não está cadastrado nos "Domínios Autorizados" no Firebase Console.
-  * **Solução**: Acesse sempre por `http://localhost:3000/admin.html` (que já é pré-autorizado) ou adicione o IP `127.0.0.1` nas configurações do console do Firebase (*Authentication -> Configurações -> Domínios Autorizados*).
+  * **Solução**: Acesse sempre por `http://localhost:3000/admin.html` (que já é pré-autorizado) ou adicione o IP `127.0.0.1` ou o domínio do GitHub Pages (`jrbsolucoes.github.io`) nas configurações do console do Firebase (*Authentication -> Configurações -> Domínios Autorizados*).
 
 * ### Cadastro Incompleto do Provedor de Login (Sem E-mail de Suporte)
   * **Sintoma**: O popup do Google falha ao conectar gerando erro de autenticação.
